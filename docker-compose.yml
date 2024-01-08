@@ -1,0 +1,52 @@
+version: '3.1'
+
+services:
+    mixpost:
+        image: inovector/mixpost-enterprise:latest
+        environment:
+            LICENSE_KEY: 'pZJzJFZORIdzEgyIqEr21GW52f4dpbRnAMg2qShfHZJD0FHqJ7QbU2ZpP97Zgqwo'
+            APP_URL: https://your-domain.com
+            APP_KEY: base64:E1dhuMOQma0D9ZYMFmnvhZiyv4v3ym+g/pE2e+3segE= # Generate a base64 secret with this tool: https://mixpost.app/encryption-key-generator
+            DB_DATABASE: 'example_db_name'
+            DB_USERNAME: 'example_db_user'
+            DB_PASSWORD: 'example_db_password'
+        ports:
+            - 9000:80
+        volumes:
+            - storage:/var/www/html/storage/app
+        depends_on:
+            - mysql
+            - redis
+        restart: unless-stopped
+    mysql:
+        image: 'mysql/mysql-server:8.0'
+        ports:
+            - '3306:3306'
+        environment:
+            MYSQL_DATABASE: 'example_db_name'
+            MYSQL_USER: 'example_db_user'
+            MYSQL_PASSWORD: 'example_db_password'
+        volumes:
+            - 'mysql:/var/lib/mysql'
+        healthcheck:
+            test: ["CMD", "mysqladmin", "ping", "-p example_db_password"]
+            retries: 3
+            timeout: 5s
+        restart: unless-stopped
+    redis:
+        image: 'redis:latest'
+        command: redis-server --appendonly yes --replica-read-only no
+        volumes:
+            - 'redis:/data'
+        healthcheck:
+            test: ["CMD", "redis-cli", "ping"]
+            retries: 3
+            timeout: 5s
+        restart: unless-stopped
+volumes:
+    mysql:
+        driver: local
+    redis:
+        driver: local
+    storage:
+        driver: local
