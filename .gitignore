@@ -20,7 +20,6 @@ yarn-error.log
 /.vscode
 .DS_Store
 
-composer.lock
 public/vendor/mixpost
 public/vendor/mixpost-enterprise
 public/vendor/horizon
